@@ -10,3 +10,4 @@
 !/test/aim/
 !/test/aim/*.cnf
 !*.py
+!README.md
