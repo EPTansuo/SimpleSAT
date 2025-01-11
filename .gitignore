@@ -6,3 +6,7 @@
 !*.hpp
 !*.cpp
 !.gitignore
+!/test/
+!/test/aim/
+!/test/aim/*.cnf
+!*.py
