@@ -51,6 +51,9 @@ public:
     bool operator==(const Clause& other) const {
         return literals == other.literals;
     }
+    bool operator!=(const Clause& other) const {
+        return !(*this == other);
+    }
 private:
 std::list<Literal> literals;
 };

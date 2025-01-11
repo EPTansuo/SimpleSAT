@@ -58,6 +58,10 @@ public: Literal(std::string name, bool negated, bool assigned=false)
         return name == other.name && negated == other.negated && 
         value == other.value && assigned == other.assigned;
     }
+
+    bool operator!=(const Literal& other) const {
+        return !(*this == other);
+    }
 private:
     std::string name;
     bool negated;

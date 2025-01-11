@@ -128,16 +128,18 @@ bool Solver::PLE(Formula &formula){
     }
 
 
-    bool found_pure_literal = true;
-    Clause& selected_clause = formula.getClauses().front();
-    
+    bool found_pure_literal = false;
+    // Clause& selected_clause = formula.getClauses().front();
+    Clause * selected_clause = nullptr;
 
     for(auto& c : formula.getClauses()){
+        found_pure_literal = false;
         for(auto& l : c.getLiterals()){
             bool found = false;
             for(auto& c2 : formula.getClauses()){
                 for(auto& l2 : c2.getLiterals()){
-                    if(l == l2){
+                    if(l.getName() == l2.getName() && c != c2){
+                        LOG_DETAIL("FOUND: l: {}, l2: {}", l.toString(), l2.toString());
                         found = true;
                         break;
                     }
@@ -147,17 +149,24 @@ bool Solver::PLE(Formula &formula){
                 }
             }
             if(!found){
-                selected_clause = c;
+                selected_clause = &c;
+                LOG_DETAIL("Selected literal: {}", l.toString());
+                LOG_DETAIL("Selected clause: {}", selected_clause->toString());
                 found_pure_literal = true;
                 break;
             }
         }
         if(found_pure_literal){
             formula.getClauses().remove_if([&](Clause& c){
-                return c == selected_clause;
+                if(c == *selected_clause){
+                    LOG_DETAIL("delete clause: {}", c.toString());
+                    return true;
+                }
+                return false;
             });
             break;
         }
+        
     }
     LOG_DETAIL("After PLE: {}", formula.toString());
     return found_pure_literal;
