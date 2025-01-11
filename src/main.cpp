@@ -5,7 +5,7 @@
 using namespace ssat;
 
 int main(int argc, char**argv) {
-    Logger::getInstance().setLogLevel(LogLevel::INFO);
+    Logger::getInstance().setLogLevel(LogLevel::NONE);
 
     //Solver solver("/home/han/Disk/Document/PROJECT/C++/SAT/sat_v.cnf");
     Solver solver; 

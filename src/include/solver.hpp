@@ -93,7 +93,7 @@ bool Solver::UP(Formula &formula){
         formula.getClauses().remove_if([&]( Clause& c){
             for( auto& l : c.getLiterals()){
                 if(l.getName() == unit_literal.getName() && l.isNegated() == unit_literal.isNegated()){
-                    LOG_DETAIL("delete clause: {}", c.toString());
+                    LOG_DEBUG("delete clause: {}", c.toString());
                     return true; 
                 }
             }
@@ -103,7 +103,7 @@ bool Solver::UP(Formula &formula){
         for(auto& clause : formula.getClauses()){
             clause.getLiterals().remove_if([&]( Literal& l){
                 if(l.getName() == unit_literal.getName() && l.isNegated() != unit_literal.isNegated()){
-                    LOG_DETAIL("delete literal: {}", l.toString());
+                    LOG_DEBUG("delete literal: {}", l.toString());
                     return true; 
                 }
                 return false;
@@ -121,7 +121,7 @@ bool Solver::UP(Formula &formula){
 
 
 bool Solver::PLE(Formula &formula){
-    LOG_DEBUG("PLE start: {}", formula.toString());
+     LOG_DETAIL("PLE start: {}", formula.toString());
     
     if(formula.empty()){
         return false;
@@ -139,7 +139,7 @@ bool Solver::PLE(Formula &formula){
             for(auto& c2 : formula.getClauses()){
                 for(auto& l2 : c2.getLiterals()){
                     if(l.getName() == l2.getName() && c != c2){
-                        LOG_DETAIL("FOUND: l: {}, l2: {}", l.toString(), l2.toString());
+                        //LOG_DETAIL("FOUND: l: {}, l2: {}", l.toString(), l2.toString());
                         found = true;
                         break;
                     }
@@ -159,7 +159,7 @@ bool Solver::PLE(Formula &formula){
         if(found_pure_literal){
             formula.getClauses().remove_if([&](Clause& c){
                 if(c == *selected_clause){
-                    LOG_DETAIL("delete clause: {}", c.toString());
+                    LOG_DEBUG("delete clause: {}", c.toString());
                     return true;
                 }
                 return false;
@@ -173,9 +173,10 @@ bool Solver::PLE(Formula &formula){
 }
 
 Result Solver::_solve(Formula formula){
-    LOG_DEBUG("Before UP: {}", formula.toString());
+    // LOG_DEBUG("Before UP: {}", formula.toString());
+    // 
     while(UP(formula));
-    LOG_DEBUG("After UP: {}", formula.toString());
+    // LOG_DEBUG("After UP: {}", formula.toString());
 
 
     if(!formula.empty()){
@@ -195,6 +196,7 @@ Result Solver::_solve(Formula formula){
             return Result::UNSAT;
         }
     }
+    LOG_DEBUG("Formula Size: {}", formula.getClauses().size());
 
     Literal l = chooseLiteral(formula);
 
