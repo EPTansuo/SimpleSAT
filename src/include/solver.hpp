@@ -15,8 +15,13 @@ class Solver {
 public: 
     Solver() {}
     Solver(const std::string filename): filename(filename) {readCNF(filename);}
+
+    enum Method {
+        DPLL,
+        CDCL
+    };
     void readCNF(const std::string filename);
-    Result solve();
+    Result solve(Method method = DPLL);
     Formula getFormula() const {
         return formula;
     }
@@ -32,7 +37,7 @@ private:
     Formula formula;
     bool UP(Formula &);
     bool PLE(Formula &);
-    Result _solve(Formula);
+    Result _solve_DPLL(Formula);
     Literal chooseLiteral(Formula &);
     Formula& setVariable(Formula&, Literal, bool);
 };
@@ -172,7 +177,7 @@ bool Solver::PLE(Formula &formula){
     return found_pure_literal;
 }
 
-Result Solver::_solve(Formula formula){
+Result Solver::_solve_DPLL(Formula formula){
     // LOG_DEBUG("Before UP: {}", formula.toString());
     // 
     while(UP(formula));
@@ -205,19 +210,24 @@ Result Solver::_solve(Formula formula){
     setVariable(formula1, l, true);
     setVariable(formula2, l, false);
 
-    return _solve(formula1) == Result::SAT ? Result::SAT : _solve(formula2);
+    return _solve_DPLL(formula1) == Result::SAT ? Result::SAT : _solve_DPLL(formula2);
 
 }
 
 
-Result Solver::solve(){
+Result Solver::solve(Method method){
     if(formula.empty()){
         LOG_ERROR("Formula is empty");
         return Result::ERROR;
     }
     
-
-    return _solve(formula);
+    if(method == DPLL){
+        return _solve_DPLL(formula);
+    }else {
+        LOG_ERROR("Method not implemented");
+        return Result::ERROR;
+    }
+    
 
     return Result::UNKNOWN; // TODO
 }
@@ -225,7 +235,7 @@ Result Solver::solve(){
 
 void Solver::readCNF(const std::string filename){
     if(filename.empty()){
-        std::cerr << "Filename is empty" << std::endl;
+            std::cerr << "Filename is empty" << std::endl;
         return;
     }
     std::ifstream file(filename);

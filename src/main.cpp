@@ -19,7 +19,7 @@ int main(int argc, char**argv) {
 
     Result result = solver.solve();
     std::cout << solver << std::endl;
-    //std::cout << "Result: " << result << std::endl;
+    std::cout << "Result: " << result << std::endl;
     LOG_INFO("Result: {}", result.toString());
     if(result == Result::ERROR){
         return 2;
