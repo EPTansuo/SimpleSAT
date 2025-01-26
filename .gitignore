@@ -11,3 +11,5 @@
 !/test/aim/*.cnf
 !*.py
 !README.md
+!conanfile.txt
+!/*.sh
