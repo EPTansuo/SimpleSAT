@@ -27,6 +27,7 @@ public:
     enum Method {
         DP,
         DPLL,
+        DPLL_CLASSIC,
         CDCL,
         RESOLUTION
     };
@@ -85,6 +86,9 @@ private:
 
     std::variant<Result, Clause> _solve_DPLL_r(Formula formula, size_t depth) const ;
     Result _solve_DPLL(Formula formula) const;
+    Result _solve_DPLL_classic(Formula formula) const;
+    Formula _unit_progate(Formula formula) const;
+    Formula _pure_iteral_elimination(Formula formula) const;
 };
 
 inline Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
@@ -176,6 +180,8 @@ inline Result Solver::solve(Method method){
         case DPLL:
             //return Result::ERROR;
             return _solve_DPLL(formula_);
+        case DPLL_CLASSIC:
+            return _solve_DPLL_classic(formula_);
         case RESOLUTION:
             return _solve_Resolution(formula_,sapy::PSet());
         case CDCL:

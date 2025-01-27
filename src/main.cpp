@@ -19,7 +19,7 @@ int main(int argc, char**argv) {
 
     std::cout << solver << std::endl;
     std::cout << "Val cnt: " << solver.getValCnt() << std::endl;
-    Result result = solver.solve(Solver::DPLL);
+    Result result = solver.solve(Solver::DPLL_CLASSIC);
     // std::cout << solver << std::endl;
     std::cout << "Result: " << result << std::endl;
     LOG_INFO("Result: {}", result.toString());
