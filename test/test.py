@@ -14,7 +14,11 @@ def get_cnf_files(folder_path):
 def main():
 
     size = 100
+    
 
+    result_pass = 0
+    result_faild = 1
+    result_unknow = 3
 
     dut = "../build/SimpleSAT"
     results = []
@@ -35,14 +39,14 @@ def main():
         ret = os.system(f"{dut} {cnf_file}")
         ret >>= 8   
 
-        expect =  1 if cnf_file.split("-")[3].startswith("yes") else 0
+        expect =  10 if cnf_file.split("-")[3].startswith("yes") else 20
         
-        if ret == expect:
-            results.append(0)
-        elif ret == 2:
-            results.append(2)
+        if( ret != 10 and ret != 20):
+            results.append(result_unknow)
+        elif ret == expect:
+            results.append(result_pass)
         else:
-            results.append(1)
+            results.append(result_faild)
     
     print("\n")
 
@@ -55,11 +59,11 @@ def main():
     for result,cnf_file in zip(results,cnf_files_basename_align):
         
         print(f"{os.path.basename(cnf_file)}: ", end="")
-        if result == 0:
+        if result == result_pass:
             print("[\33[1;32mPASS\33[0m]")
-        elif result == 2:
-            print("[\33[1;33mERROR\33[0m]")
-        elif result == 1:
+        #elif result == 2:
+        #    print("[\33[1;33mERROR\33[0m]")
+        elif result == result_faild:
             print("[\33[1;31mFAIL\33[0m]")
         else:
             print("[\33[1;34mUNKNOWN\33[0m]")
