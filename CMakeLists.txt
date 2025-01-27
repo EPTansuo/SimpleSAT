@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 project(SimpleSAT CXX)
 
 find_package(sapy REQUIRED)
+find_package(argparse REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -15,6 +16,6 @@ add_compile_options(-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/src/=)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} sapy::sapy)
+target_link_libraries(${PROJECT_NAME} sapy::sapy argparse::argparse)
 
 

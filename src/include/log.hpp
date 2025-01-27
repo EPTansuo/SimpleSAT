@@ -41,6 +41,24 @@ public :
       std::lock_guard<std::mutex> lock(mutex_);
       currentLevel_ = level;
   }
+
+  void setLogLevel(std::string level){
+      if(level == "DETAIL"){
+          setLogLevel(LogLevel::DETAIL);
+      }else if(level == "DEBUG"){
+          setLogLevel(LogLevel::DEBUG);
+      }else if(level == "INFO"){
+          setLogLevel(LogLevel::INFO);
+      }else if(level == "WARN"){
+          setLogLevel(LogLevel::WARN);
+      }else if(level == "ERROR"){
+          setLogLevel(LogLevel::ERROR);
+      }else if(level == "NONE"){
+          setLogLevel(LogLevel::NONE);
+      }else{
+          std::cerr<< "Invalid log level: " << level << std::endl;
+      }
+  }
   template <typename... Args>
   void log(LogLevel level, std::string_view format_str, Args&&... args) const {
       std::lock_guard<std::mutex> lock(mutex_);

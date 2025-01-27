@@ -1,21 +1,47 @@
 #include <iostream>
 #include <string>
 #include <solver.hpp>
+#include <argparse/argparse.hpp>
 
 using namespace ssat;
 
 int main(int argc, char**argv) {
-    Logger::getInstance().setLogLevel(LogLevel::NONE);
+    argparse::ArgumentParser program("SimpleSAT");
+    program.add_argument("cnf_file")               
+           .help("cnf file path")             
+           .required(); 
+    
+    program.add_argument("--log")               
+           .help("log level: NONE|ERROR|WARN|INFO|DEBUG|DETAIL")                  
+           .default_value(std::string("INFO"))
+           .required()
+           .action([](const std::string& value) {
+               static const std::vector<std::string> choices = {"DETAIL", "DEBUG", "INFO", "WARN", "ERROR", "NONE"};
+               if (std::find(choices.begin(), choices.end(), value) == choices.end()) {
+                   throw std::runtime_error("Invalid value for --log: " + value);
+               }
+               return value;
+           });
+    
+    
 
-    //Solver solver("/home/han/Disk/Document/PROJECT/C++/SAT/sat_v.cnf");
+    
+    try {
+        program.parse_args(argc, argv);
+    } catch (const std::runtime_error& err) {
+        std::cout << err.what() << std::endl;
+        std::cout << program;
+        exit(0);
+    }
+
+    auto log_level = program.get<std::string>("--log");
+    auto cnf = program.get<std::string>("cnf_file");
+
+    Logger::getInstance().setLogLevel(log_level);
+
     Solver solver; 
-    if(argc == 1){
-        solver.readCNF("/home/han/Disk/Document/PROJECT/C++/SAT/sat_v.cnf");
-    }
-    else{
-        solver.readCNF(argv[1]);
-        LOG_INFO("Read file: {}", argv[1]);
-    }
+    solver.readCNF(cnf);
+    LOG_INFO("Read file: {}", argv[1]);
 
     std::cout << solver << std::endl;
     std::cout << "Val cnt: " << solver.getValCnt() << std::endl;

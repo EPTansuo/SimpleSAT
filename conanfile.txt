@@ -1,5 +1,6 @@
 [requires]
 sapy/0.0.1
+argparse/3.1
 
 [generators]
 CMakeDeps
