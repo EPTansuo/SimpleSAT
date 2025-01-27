@@ -1,7 +1,7 @@
 #pragma once
 
-#include "clause.hpp"
-#include <list>
+#include <sapy/pset.h>
+#include <iostream>
 
 namespace ssat
 {
@@ -9,50 +9,41 @@ namespace ssat
 class Formula{
 public:
     Formula(){}
-    Formula(Clause clause){
-        clauses.push_back(clause);
-    }
-    void push(Clause clause){
-        clauses.push_back(clause);
-    }
-    std::list<Clause>& getClauses(){
-        return clauses;
+    Formula(const sapy::PSet& formula): formula_(formula) {}
+
+    sapy::PSet& getFormula() {
+        return formula_;
     }
 
-    bool empty(){
-        return clauses.empty();
-    }
-
-    std::string toString() const {
-        std::string str = "";
-        for(int i = 0; i < clauses.size(); i++){
-            str += "(";
-            auto it = std::next(clauses.begin(), i);
-            str += it->toString();
-            str += ")";
-            if(i != clauses.size() - 1){
-                str += " ∧ ";
+    sapy::PString toPString() const {
+        sapy::PString result = "Formula: ";
+        size_t i=0, j=0; 
+        for(auto clause = formula_.cbegin(); clause != formula_.cend(); clause++){
+            i++;
+            result += "(";
+            j=0;
+            for(sapy::PString literal : clause->unwrap<sapy::PSet>()){
+                j++;
+                result += (literal + (j != clause->unwrap<sapy::PSet>().size() ? " ∨ " : ""));
             }
+            result += (sapy::PString(")") + (i != formula_.size() ? " ∧ " : ""));
         }
-        return str;
+        return result;
     }
-    friend std::ostream& operator<<(std::ostream& os, const Formula& formula){
-        os << formula.toString();
-        return os;
+    inline void clear(){
+        formula_.clear();
     }
-
-    bool getResult(){
-        for(auto clause : clauses){
-            if(!clause.getResult()){
-                return false;
-            }
-            return true;
-        }
+    inline void add(const sapy::PSet& clause){
+        formula_.add(clause);
     }
 
 private: 
+    friend std::ostream& operator<<(std::ostream& os, const Formula& formula){
+        os << formula.toPString();
+        return os;
+    }
+    sapy::PSet formula_;
 
-    std::list<ssat::Clause> clauses; 
 };
 
 } // namespace ssat

@@ -10,7 +10,8 @@ include_directories(${PROJECT_SOURCE_DIR}/src/include)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
-add_compile_options(-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/src=src)
+add_compile_options(-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/src/=)
+
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 

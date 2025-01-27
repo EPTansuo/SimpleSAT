@@ -5,7 +5,7 @@
 using namespace ssat;
 
 int main(int argc, char**argv) {
-    Logger::getInstance().setLogLevel(LogLevel::NONE);
+    Logger::getInstance().setLogLevel(LogLevel::DETAIL);
 
     //Solver solver("/home/han/Disk/Document/PROJECT/C++/SAT/sat_v.cnf");
     Solver solver; 
@@ -17,12 +17,15 @@ int main(int argc, char**argv) {
         LOG_INFO("Read file: {}", argv[1]);
     }
 
-    Result result = solver.solve();
     std::cout << solver << std::endl;
+    std::cout << "Val cnt: " << solver.getValCnt() << std::endl;
+    Result result = solver.solve(Solver::DP);
+    // std::cout << solver << std::endl;
     std::cout << "Result: " << result << std::endl;
     LOG_INFO("Result: {}", result.toString());
     if(result == Result::ERROR){
         return 2;
     }
     return result == Result::SAT;
+    return 0;
 }

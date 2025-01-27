@@ -16,12 +16,12 @@ def main():
     size = 100
 
 
-    dut = "../build/simple_sat"
+    dut = "../build/SimpleSAT"
     results = []
 
     cnf_files = get_cnf_files(os.getcwd() + "/aim")
 
-    cnf_filter_files = [cnf_file for cnf_file in cnf_files if "50" in cnf_file ]#or "100" in cnf_file ]
+    cnf_filter_files = [cnf_file for cnf_file in cnf_files if "50-1" in cnf_file ]#or "100" in cnf_file ]
 
     cnf_files = cnf_filter_files
 
