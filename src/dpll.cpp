@@ -4,6 +4,15 @@
 namespace ssat{
 
 
+/********************************************************
+* 
+* Davis-Putnam-Logemann-Loveland Algorithm (Ref: Algorithm
+* 3.3 in Handbook of satisfiability, second edition)
+* 
+********************************************************/
+
+
+
 Result Solver::_solve_DPLL(Formula formula) const{
     auto result = _solve_DPLL_r(formula,0);
     if(std::get_if<Result>(&result) != nullptr){

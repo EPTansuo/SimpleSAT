@@ -10,7 +10,7 @@
 #include <sapy/pset.h>
 #include <sapy/plist.h>
 #include <variant>
-
+#include <array>
 namespace ssat{
 
 using Literal = sapy::PString;
@@ -18,6 +18,20 @@ using Clause = sapy::PSet;
 using Clauses = sapy::PSet;
 using Formula = sapy::PSet;
 using Variable = sapy::PString;
+using BDD = sapy::PList;
+
+
+#define METHOD_NAMES(_) \
+    _(DP) \
+    _(DPLL) \
+    _(DPLL_CLASSIC) \
+    _(CDCL) \
+    _(SYMBOLIC_SAT) \
+    _(RESOLUTION)
+
+#define ENUM_GEN(name) name,
+#define STRING_GEN(name) sapy::PString(#name),
+
 
 class Solver {
 public: 
@@ -25,12 +39,29 @@ public:
     Solver(const sapy::PString _filename): filename_(_filename) {}
 
     enum Method {
-        DP,
-        DPLL,
-        DPLL_CLASSIC,
-        CDCL,
-        RESOLUTION
+        METHOD_NAMES(ENUM_GEN)
+        METHOD_COUNT
     };
+
+    static const sapy::PList MethodNames;
+
+
+    static sapy::PString MethodtoString(Method method) {
+        if (method < METHOD_COUNT) {
+            return MethodNames[method];
+        }
+        return "Unknown";
+    }
+
+    static Method methodFromString(const sapy::PString& methodName) {
+        for (size_t i = 0; i < MethodNames.size(); ++i) {
+            if (methodName == MethodNames[i]) {
+                return static_cast<Method>(i);
+            }
+        }
+        throw std::invalid_argument("Invalid method name: " + methodName);
+    }
+
     void readCNF(const sapy::PString filename);
     inline void readCNF(){readCNF(filename_);}
     Result solve(Method method = DPLL);
@@ -89,10 +120,20 @@ private:
     Result _solve_DPLL_classic(Formula formula) const;
     Formula _unit_progate(Formula formula) const;
     Formula _pure_iteral_elimination(Formula formula) const;
+
+    Result _solve_SYMBOLIC_SAT(Formula formula) const;
+
+    BDD _OBDD(const Clause clause) const;
+    
+};
+
+
+inline const sapy::PList Solver::MethodNames = {
+        METHOD_NAMES(STRING_GEN)
 };
 
 inline Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
-    LOG_DEBUG("Formula: {}", formula.toString().toStdString());
+    LOG_DEBUG("Formula: {}", formula.toString());
 
     sapy::PList to_add;
     sapy::PList to_remove;  
@@ -104,8 +145,8 @@ inline Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
             if(it == jt) continue;
             Clause clause1 = *it;
             Clause clause2 = *jt;
-            //LOG_DETAIL("for : Clause1: {}, Clause2: {}", clause1.toString().toStdString(),
-            //                                      clause2.toString().toStdString());
+            //LOG_DETAIL("for : Clause1: {}, Clause2: {}", clause1.toString(),
+            //                                      clause2.toString());
             Literal l;                                                  
             Clause resolvent = _resolve(clause1, clause2, l);
             
@@ -117,25 +158,25 @@ inline Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
             
             to_add.append(resolvent);
             to_remove.append(clause1, clause2);
-            LOG_DEBUG("Clause1: {}, Clause2: {}", clause1.toString().toStdString(),
-                                                    clause2.toString().toStdString());
-            LOG_DEBUG("Resolvent: {}", resolvent.toString().toStdString());
+            LOG_DEBUG("Clause1: {}, Clause2: {}", clause1.toString(),
+                                                    clause2.toString());
+            LOG_DEBUG("Resolvent: {}", resolvent.toString());
             // to_stop = true;
 
         }
     }
     
     for(auto it = to_add.begin(); it != to_add.end(); it++){
-        //LOG_DEBUG("Add: {}", it->toString().toStdString());
+        //LOG_DEBUG("Add: {}", it->toString());
         formula.add(*it);
     }
 
     for(auto it = to_remove.begin(); it != to_remove.end(); it++){
-        //LOG_DEBUG("Remove: {}", it->toString().toStdString());
+        //LOG_DEBUG("Remove: {}", it->toString());
         formula.discard(*it);
     }
     
-    LOG_DETAIL("Literals of resolution: {}", literals.toString().toStdString());
+    LOG_DETAIL("Literals of resolution: {}", literals.toString());
 
     if(to_remove.size()==0){
         // Stop  recursive here
@@ -184,6 +225,8 @@ inline Result Solver::solve(Method method){
             return _solve_DPLL_classic(formula_);
         case RESOLUTION:
             return _solve_Resolution(formula_,sapy::PSet());
+        case SYMBOLIC_SAT:
+            return _solve_SYMBOLIC_SAT(formula_);
         case CDCL:
             return Result::ERROR;
     }
@@ -191,7 +234,7 @@ inline Result Solver::solve(Method method){
 }
 
 inline void Solver::readCNF(const sapy::PString _filename){
-    std::string filename = _filename.toStdString();
+    std::string filename = _filename;
     if(filename.empty()){
         LOG_ERROR("Filename is empty");
         return;
@@ -209,7 +252,7 @@ inline void Solver::readCNF(const sapy::PString _filename){
         }else if(line[0] == 'p'){
             sapy::PString line_ = line;
             sapy::PString val_cnt_str = line_.split(" ")[2];
-            val_cnt_ = std::stoul(val_cnt_str.toStdString());
+            val_cnt_ = std::stoul(val_cnt_str);
             continue;
         }
         sapy::PList tokens;

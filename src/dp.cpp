@@ -2,8 +2,17 @@
 
 
 namespace ssat{
+
+/********************************************************
+ * 
+ * Davis-Putnam Algorithm (Ref: Algorithm 3.1 in Handbook
+ * of satisfiability, second edition)
+ * 
+********************************************************/
+
+
 Result Solver::_solve_DP(Formula formula){
-    LOG_DEBUG("Formula: {}", formula.toString().toStdString());
+    LOG_DEBUG("Formula: {}", formula.toString());
     if(formula.size() == 1 && formula.contain(Clause())){
         return Result::UNSAT;
     }
@@ -24,12 +33,12 @@ Result Solver::_solve_DP(Formula formula){
         C.add(clause);
         Buckets[variable] = Buckets[variable].unwrap<Clauses>().union_(C);
     }
-    LOG_DEBUG("Buckets: {}", Buckets.toString().toStdString());
+    LOG_DEBUG("Buckets: {}", Buckets.toString());
     // for each variable V of Δ in order π 
     for(size_t i=1; i<=val_cnt_; i++){
         Variable variable = std::to_string(i);
         Clauses bucket = Buckets[variable].unwrap<Clauses>();
-        LOG_DETAIL("Variable: {}, Bucket: {}", variable.toStdString(), bucket.toString().toStdString());
+        LOG_DETAIL("Variable: {}, Bucket: {}", variable, bucket.toString());
         // if BV is not empty then
         if(bucket.size() != 0){
             
@@ -87,7 +96,7 @@ Result Solver::_solve_DP(Formula formula){
                 }
                 Buckets[variable] = updated_bucket;
 
-                LOG_DETAIL("to_union: {}", to_union.toString().toStdString());
+                LOG_DETAIL("to_union: {}", to_union.toString());
                 
                 // Bu = Bu ∪ {C}                
                 for(auto it = to_union.begin(); it != to_union.end(); it++){
@@ -98,7 +107,7 @@ Result Solver::_solve_DP(Formula formula){
                 
             }
             
-            LOG_DETAIL("Buckets: {}", Buckets.toString().toStdString());
+            LOG_DETAIL("Buckets: {}", Buckets.toString());
             
         }
     }

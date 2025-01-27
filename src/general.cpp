@@ -10,8 +10,8 @@ Literal Solver::_complementry(const Literal& literal) const {
 }
 
 Formula Solver::_condition(const Formula formula, const Literal& literal) const {
-    LOG_DETAIL("Before Conditioning: {}, Literal: {}", formula.toString().toStdString(),
-                                                      literal.toString().toStdString());
+    LOG_DETAIL("Before Conditioning: {}, Literal: {}", formula.toString(),
+                                                      literal.toString());
     Formula result;
     Literal complementary = _complementry(literal);
     for(auto it = formula.cbegin(); it != formula.cend(); it++){
@@ -24,13 +24,13 @@ Formula Solver::_condition(const Formula formula, const Literal& literal) const 
             result.add(clause);
         }
     }
-    LOG_DETAIL("After Conditioning: {}", result.toString().toStdString());
+    LOG_DETAIL("After Conditioning: {}", result.toString());
     return result;
 }
 
 // void Solver::_condition(Formula& formula, const Literal& literal) const {
-//     LOG_DEBUG("Before Conditioning: {}, Literal: {}", formula.toString().toStdString(),
-//                                                       literal.toString().toStdString());    
+//     LOG_DEBUG("Before Conditioning: {}, Literal: {}", formula.toString(),
+//                                                       literal.toString());    
 //     Literal complementary = _complementry(literal);
 //     sapy::PList to_add;
 //     sapy::PList to_remove;
@@ -52,15 +52,15 @@ Formula Solver::_condition(const Formula formula, const Literal& literal) const 
 //     for(auto it = to_add.begin(); it != to_add.end(); it++){
 //         formula.add(*it);
 //     }
-//     LOG_DEBUG("After Conditioning: {}", formula.toString().toStdString());
+//     LOG_DEBUG("After Conditioning: {}", formula.toString());
 // }
 
 
 Clause Solver::_resolve(const Clause clause1, const Clause clause2, const Variable& variable, bool& got) const{
     got = false;
     auto resolvent = Clause();
-    LOG_DETAIL("Resolve: Clause1: {}, Clause2: {} with Variable: {}", clause1.toString().toStdString(),
-                                                  clause2.toString().toStdString(), variable.toStdString());
+    LOG_DETAIL("Resolve: Clause1: {}, Clause2: {} with Variable: {}", clause1.toString(),
+                                                  clause2.toString(), variable);
     Literal complementary = _complementry(variable);
     if(clause1.contain(variable) && clause2.contain(complementary)){
         resolvent = (clause1-variable).union_(clause2-complementary);
@@ -72,7 +72,7 @@ Clause Solver::_resolve(const Clause clause1, const Clause clause2, const Variab
     }
 
     if(got){
-        LOG_DETAIL("{}-Resolvent: {}", variable.toStdString(), resolvent.toString().toStdString());
+        LOG_DETAIL("{}-Resolvent: {}", variable, resolvent.toString());
         return resolvent;
     }    
 
@@ -86,8 +86,8 @@ Clause Solver::_resolve(const Clause clause1, const Clause clause2, Literal& lit
         Literal complementary = _complementry(literal);
         if(clause2.contain(complementary)){
             resolvent = (clause1-literal).union_(clause2-complementary);
-            LOG_DETAIL("Resolvent: {}, Literal: {}", resolvent.toString().toStdString(),
-                                                      literal.toString().toStdString());
+            LOG_DETAIL("Resolvent: {}, Literal: {}", resolvent.toString(),
+                                                      literal.toString());
             return resolvent;
         }
     }

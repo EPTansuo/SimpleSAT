@@ -3,19 +3,29 @@
 namespace ssat{
 
 
+
+/********************************************************
+ * 
+ * Davis-Putnam-Logemann-Loveland Algorithm (Ref:
+ * https://www.cnblogs.com/chesium/p/15982285.html
+ * 
+*********************************************************/
+
+
+
 Result Solver::_solve_DPLL_classic(Formula formula) const{
 
-    LOG_DEBUG("Formula: {}", formula.toString().toStdString());
+    LOG_DEBUG("Formula: {}", formula.toString());
     formula = _unit_progate(formula);
 
-    LOG_DEBUG("After UP: {}", formula.toString().toStdString());
+    LOG_DEBUG("After UP: {}", formula.toString());
 
     if(formula.contain(Clause())){
         return Result::UNSAT;
     }
 
     formula = _pure_iteral_elimination(formula);
-    LOG_DEBUG("After PLE: {}", formula.toString().toStdString());
+    LOG_DEBUG("After PLE: {}", formula.toString());
 
     if(formula.size()==0){
         return Result::SAT;
@@ -76,7 +86,7 @@ Formula Solver::_pure_iteral_elimination(Formula formula) const{
         }
     }
 
-    LOG_DEBUG("Pure Literals: {}", pure_literals.toString().toStdString());
+    LOG_DEBUG("Pure Literals: {}", pure_literals.toString());
     // remove all clauses containing pure literals
     sapy::PList to_remove;
     for(auto it = formula.begin(); it != formula.end(); it++){
