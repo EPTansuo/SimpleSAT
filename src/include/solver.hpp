@@ -9,6 +9,7 @@
 #include <sapy/pstring.h>
 #include <sapy/pset.h>
 #include <sapy/plist.h>
+#include <variant>
 
 namespace ssat{
 
@@ -75,91 +76,18 @@ private:
     Result _solve_Resolution(Formula,sapy::PSet literals);
     Clause _resolve(const Clause clause1, const Clause clause2, Literal& literal) const;
     Clause _resolve(const Clause clause1, const Clause clause2, const Variable& variable, bool& got) const;
-    void _condition(Formula& formula, const Literal& literal) const;
+    // void _condition(Formula& formula, const Literal& literal) const;
+    Formula _condition(const Formula formula, const Literal& literal) const;
     Literal _complementry(const Literal& literal) const;
 
     Result _solve_DP(Formula formula);
     Variable _firstVariable(const Clause& clause) const;
+
+    std::variant<Result, Clause> _solve_DPLL_r(Formula formula, size_t depth) const ;
+    Result _solve_DPLL(Formula formula) const;
 };
 
-Literal Solver::_complementry(const Literal& literal) const {
-    if(literal.startswith("¬")){
-        return literal.substr(1);
-    }else{
-        return "¬" + literal;
-    }
-}
-
-void Solver::_condition(Formula& formula, const Literal& literal) const {
-    LOG_DEBUG("Before Conditioning: {}, Literal: {}", formula.toString().toStdString(),
-                                                      literal.toString().toStdString());    
-    Literal complementary = _complementry(literal);
-    sapy::PList to_add;
-    sapy::PList to_remove;
-    for (auto it = formula.begin(); it != formula.end(); it++) {
-        Clause clause = *it;
-        if (clause.contain(literal)) {
-            to_remove.append(clause);  
-        } else if (clause.contain(complementary)) {
-            to_remove.append(clause);
-            to_add.append(clause - complementary);
-        } else {
-            // Do nothing
-        }
-    }
-    for(auto it = to_remove.begin(); it != to_remove.end(); it++){
-        formula.discard(*it);
-    }
-
-    for(auto it = to_add.begin(); it != to_add.end(); it++){
-        formula.add(*it);
-    }
-    LOG_DEBUG("After Conditioning: {}", formula.toString().toStdString());
-}
-
-
-Clause Solver::_resolve(const Clause clause1, const Clause clause2, const Variable& variable, bool& got) const{
-    got = false;
-    auto resolvent = Clause();
-    LOG_DETAIL("Resolve: Clause1: {}, Clause2: {} with Variable: {}", clause1.toString().toStdString(),
-                                                  clause2.toString().toStdString(), variable.toStdString());
-    Literal complementary = _complementry(variable);
-    if(clause1.contain(variable) && clause2.contain(complementary)){
-        resolvent = (clause1-variable).union_(clause2-complementary);
-        got = true;
-        
-    }else if(clause1.contain(complementary) && clause2.contain(variable)){
-        resolvent = (clause1-complementary).union_(clause2-variable);
-        got = true;
-    }
-
-    if(got){
-        LOG_DETAIL("{}-Resolvent: {}", variable.toStdString(), resolvent.toString().toStdString());
-        return resolvent;
-    }    
-
-    return Clause();
-}
-
-Clause Solver::_resolve(const Clause clause1, const Clause clause2, Literal& literal) const{
-    auto resolvent = Clause();
-    for(auto it = clause1.cbegin(); it != clause1.cend(); it++){
-        literal = *it;
-        Literal complementary = _complementry(literal);
-        if(clause2.contain(complementary)){
-            resolvent = (clause1-literal).union_(clause2-complementary);
-            LOG_DETAIL("Resolvent: {}, Literal: {}", resolvent.toString().toStdString(),
-                                                      literal.toString().toStdString());
-            return resolvent;
-        }
-    }
-    literal = Literal();
-    return Clause();
-}
-
-
-
-Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
+inline Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
     LOG_DEBUG("Formula: {}", formula.toString().toStdString());
 
     sapy::PList to_add;
@@ -233,132 +161,21 @@ Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
 }
 
 
-// first variable of C according to order π: sort according to lexicographical order.
-Variable Solver::_firstVariable(const Clause& clause) const{
-    if(clause.size() == 0){
-        std::runtime_error("Empty clause");
-        return Variable();
-    }
-    sapy::PSet unsorted;
-    std::vector <Literal> sorted;
-    for(auto it = clause.cbegin(); it != clause.cend(); it++){
-        Literal literal = *it;
-        if(literal.startswith("¬")){
-            unsorted.add(literal.substr(1));
-        }else{
-            unsorted.add(literal);
-        }
-    }
-    for(auto it = unsorted.begin(); it != unsorted.end(); it++){
-        sorted.push_back(it->unwrap<Variable>());
-    }
-    std::sort(sorted.begin(), sorted.end());
-
-    return sorted[0];
-}
 
 
-Result Solver::_solve_DP(Formula formula){
-    LOG_DEBUG("Formula: {}", formula.toString().toStdString());
-    if(formula.size() == 1 && formula.contain(sapy::PSet())){
-        return Result::UNSAT;
-    }
-    sapy::PDict Buckets;
-    
-    // for each variable V of Δ do
-    for(size_t i=1; i<=val_cnt_; i++){
-        Buckets[Variable(std::to_string(i))] = Clauses();  //create empty bucket Bv
-    }
 
-    // for each clause C of Δ do
-    for(auto clause_wrap: formula){
-        Clause clause = clause_wrap;
-        Variable variable = _firstVariable(clause); //V = first variable of C according to order π
-
-        // Bv = Bv ∪ {C}
-        Clauses C;
-        C.add(clause);
-        Buckets[variable] = Buckets[variable].unwrap<Clauses>().union_(C);
-    }
-    LOG_DEBUG("Buckets: {}", Buckets.toString().toStdString());
-    // for each variable V of Δ in order π 
-    for(size_t i=1; i<=val_cnt_; i++){
-        Variable variable = std::to_string(i);
-        Clauses bucket = Buckets[variable].unwrap<Clauses>();
-        LOG_DETAIL("Variable: {}, Bucket: {}", variable.toStdString(), bucket.toString().toStdString());
-        // if BV is not empty then
-        if(bucket.size() != 0){
-            
-            sapy::PDict to_union;
-            sapy::PSet to_remove;
-
-            //for each V-resolvent C of clauses in BV do
-            for(auto clause1_it = bucket.begin(); clause1_it != bucket.end(); ++clause1_it){
-                Clause clause1 = *clause1_it;
-                for(auto clause2_it = (clause1_it); clause2_it != bucket.end(); ++clause2_it){
-                    Clause clause2 = *clause2_it;
-                    if(clause1 == clause2) continue;
-
-                    bool got = false;
-                    Clause v_resolvent_C = _resolve(clause1, clause2, variable, got);
-
-                    if (got && v_resolvent_C.size() == 0) {
-                        return Result::UNSAT;
-                    }
-                    if(got){
-                        // U = first variable of clause C according to order π
-                        Variable U = _firstVariable(v_resolvent_C);
-
-                        to_remove.add(clause1);
-                        to_remove.add(clause2);
-
-                        // Bu = Bu ∪ {C}
-                        Clause C;
-                        C.add(v_resolvent_C);
-                        if(!to_union.contain(U)){
-                            to_union[U] = Clause();
-                        }
-
-                        to_union[U] = to_union[U].unwrap<Clauses>().union_(C);
-                        // goto next;
-                    }
-
-                    //Buckets[U] = Buckets[U].unwrap<Clauses>().union_(C);
-                }
-                
-            }
-// next:
-            Clauses updated_bucket;
-            for (const auto& clause : bucket) {
-                if (!to_remove.contain(clause)) {
-                    updated_bucket.add(clause);
-                }
-            }
-            Buckets[variable] = updated_bucket;
-            LOG_DETAIL("to_union: {}", to_union.toString().toStdString());
-            for(auto it = to_union.begin(); it != to_union.end(); it++){
-                Variable U = it->first;
-                Clauses new_clauses = it->second.unwrap<Clauses>();
-                Buckets[U] = Buckets[U].unwrap<Clauses>().union_(new_clauses);
-            }
-
-            LOG_DETAIL("Buckets: {}", Buckets.toString().toStdString());
-            
-        }
-    }
-
-    return Result::SAT;
-}
-
-Result Solver::solve(Method method){
+inline Result Solver::solve(Method method){
     // Formula form = Formula(formula_);
-    // _condition(form, "3");
-
+    // Formula result = _condition(form, "3");
+    // std::cout << "Result: " << result.toString() << std::endl;
+    // result = _condition(form, "¬3");
+    // std::cout << "Result: " << result.toString() << std::endl;
     switch(method){
         case DP:
             return _solve_DP(formula_);
         case DPLL:
-            return Result::ERROR;
+            //return Result::ERROR;
+            return _solve_DPLL(formula_);
         case RESOLUTION:
             return _solve_Resolution(formula_,sapy::PSet());
         case CDCL:
@@ -367,7 +184,7 @@ Result Solver::solve(Method method){
     return Result::ERROR;
 }
 
-void Solver::readCNF(const sapy::PString _filename){
+inline void Solver::readCNF(const sapy::PString _filename){
     std::string filename = _filename.toStdString();
     if(filename.empty()){
         LOG_ERROR("Filename is empty");

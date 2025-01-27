@@ -11,7 +11,7 @@ public:
     static const Result UNKNOWN;
     static const Result ERROR;
 
-    std::string toString() const {
+    inline std::string toString() const {
         switch (type) {
         case Type::SAT: return "SAT";
         case Type::UNSAT: return "UNSAT";
@@ -21,11 +21,11 @@ public:
         }
     }
 
-    bool operator==(const Result& other) const {
+    inline bool operator==(const Result& other) const {
         return type == other.type;
     }
 
-    bool operator!=(const Result& other) const {
+    inline bool operator!=(const Result& other) const {
         return !(*this == other);
     }
 
@@ -40,9 +40,9 @@ private:
     Result(Type t) :type(t) {}
 };
 
-const Result Result::SAT(Result::Type::SAT);
-const Result Result::UNSAT(Result::Type::UNSAT);
-const Result Result::UNKNOWN(Result::Type::UNKNOWN);
-const Result Result::ERROR(Result::Type::ERROR);
+inline const Result Result::SAT(Result::Type::SAT);
+inline const Result Result::UNSAT(Result::Type::UNSAT);
+inline const Result Result::UNKNOWN(Result::Type::UNKNOWN);
+inline const Result Result::ERROR(Result::Type::ERROR);
 
 }
