@@ -18,7 +18,10 @@ using Clause = sapy::PSet;
 using Clauses = sapy::PSet;
 using Formula = sapy::PSet;
 using Variable = sapy::PString;
-using BDD = sapy::PList;
+
+// BDD: bdd[0]: variable name, bdd[1]: low_branch, bdd[2]: high_branch
+using BDD = sapy::PList; 
+using BDDs = sapy::PSet;
 
 
 #define METHOD_NAMES(_) \
@@ -123,7 +126,15 @@ private:
 
     Result _solve_SYMBOLIC_SAT(Formula formula) const;
 
-    BDD _OBDD(const Clause clause) const;
+    BDD _OBDD_r(BDD bdd, Clause clause, int branch = 0) const;
+    BDD _OBDD(Clause clause) const;
+
+    sapy::PString _BDD_to_dot(const BDD& bdd) const;
+    void _show_dot(const sapy::PString& dot, bool block = true) const;
+    void _show_BDD(const BDD& bdd, bool block = true) const;
+    BDD _reduce_OBDD(const BDD& bdd)const;
+    // void _traverse_BDD_r(const BDD& bdd, sapy::PSet& edges, sapy::PSet& visited) const;
+    // sapy::PSet _traverse_BDD(const BDD&bdd)
     
 };
 
@@ -215,6 +226,15 @@ inline Result Solver::solve(Method method){
     // std::cout << "Result: " << result.toString() << std::endl;
     // result = _condition(form, "¬3");
     // std::cout << "Result: " << result.toString() << std::endl;
+
+    Formula form = Formula(formula_);
+    Clause clause = form.begin()->unwrap<Clause>();
+
+    BDD bdd = _OBDD(clause);
+
+    LOG_INFO("BDD: {}", bdd.toString());
+    _show_BDD(bdd);
+
     switch(method){
         case DP:
             return _solve_DP(formula_);

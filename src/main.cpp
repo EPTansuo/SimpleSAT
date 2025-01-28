@@ -51,7 +51,7 @@ int main(int argc, char**argv) {
 
     program.add_argument("-m")
             .help("method: " + sapy::PString("|").join(Solver::MethodNames))
-            .default_value("DPLL_CLASSIC")
+            .default_value("DPLL")
             .required()
             .action([](const std::string& value) {
                 if(Solver::MethodNames.count(sapy::PString(value)) == 0){
