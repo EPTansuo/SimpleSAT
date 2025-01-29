@@ -102,7 +102,7 @@ Variable Solver::_firstVariable(const Clause& clause) const{
         return Variable();
     }
     sapy::PSet unsorted;
-    std::vector <Literal> sorted;
+    sapy::PList sorted;
     for(auto it = clause.cbegin(); it != clause.cend(); it++){
         Literal literal = *it;
         if(literal.startswith("¬")){
@@ -112,12 +112,133 @@ Variable Solver::_firstVariable(const Clause& clause) const{
         }
     }
     for(auto it = unsorted.begin(); it != unsorted.end(); it++){
-        sorted.push_back(it->unwrap<Variable>());
+        sorted.append(it->unwrap<Variable>());
     }
-    std::sort(sorted.begin(), sorted.end());
+    sorted.sort(varibale_order_);
 
     return sorted[0];
 }
+
+int Solver::_variable2indice(const Variable& variable)const {
+    if(sorted_variables_.count(variable) == 0){
+        std::runtime_error("Variable not found");
+    }
+    return sorted_variables_.index(variable) + 1;
+};
+Variable Solver::_indice2variable(int indice) const{
+    if(indice < 1 || indice > sorted_variables_.size()){
+        std::runtime_error("Invalid indice");
+    }
+    return sorted_variables_[indice-1];
+}
+
+
+
+
+Result Solver::solve(Method method){
+    // Formula form = Formula(formula_);
+    // Formula result = _condition(form, "3");
+    // std::cout << "Result: " << result.toString() << std::endl;
+    // result = _condition(form, "¬3");
+    // std::cout << "Result: " << result.toString() << std::endl;
+
+    Formula form = Formula(formula_);
+    Clause clause = *form.begin();
+
+    BDD bdd = _OBDD(clause);
+
+    LOG_INFO("BDD: {}", bdd.toString());
+    _show_BDD(bdd);
+
+    switch(method){
+        case DP:
+            return _solve_DP(formula_);
+        case DPLL:
+            //return Result::ERROR;
+            return _solve_DPLL(formula_);
+        case DPLL_CLASSIC:
+            return _solve_DPLL_classic(formula_);
+        case RESOLUTION:
+            return _solve_Resolution(formula_,sapy::PSet());
+        case SYMBOLIC_SAT:
+            return _solve_SYMBOLIC_SAT(formula_);
+        case CDCL:
+            return Result::ERROR;
+    }
+    return Result::ERROR;
+}
+
+void Solver::readCNF(const sapy::PString _filename){
+    std::string filename = _filename;
+    if(filename.empty()){
+        LOG_ERROR("Filename is empty");
+        return;
+    }
+    std::ifstream file(filename);
+    if(!file){
+        LOG_ERROR("File not found: {}", filename);
+        return;
+    }
+    formula_.clear();
+    std::string line;
+    sapy::PSet variables;
+    digit_variable_ = true;
+    while(std::getline(file, line)){
+        if (line.empty() || line[0] == 'c') {
+            continue;
+        }else if(line[0] == 'p'){
+            sapy::PString line_ = line;
+            sapy::PString val_cnt_str = line_.split(" ")[2];
+            val_cnt_ = std::stoul(val_cnt_str);
+            continue;
+        }
+        sapy::PList tokens;
+        sapy::PString token;
+        for (int i = 0; i < line.size(); i++) {
+            if (line[i] == ' ') {
+                if (!(token == "")) {
+                    tokens.append(token);
+                    token = "";
+                }
+            }
+            else {
+                token += line[i];
+            }
+        }
+        if (!(token == "")) {
+            tokens.append(token);
+        }
+
+    
+        Clause clause;
+        for (int i = 0; i < tokens.size(); i++) {
+            if (tokens[i].unwrap<sapy::PString>() == "0") {
+                break;
+            }
+
+            sapy::PString token = tokens[i];
+            bool negated = (token[0] == '-');
+            sapy::PString varName = negated ? token.substr(1) : token;
+            
+            Literal literal = negated ? "¬" + varName : varName;
+            clause.add(literal);
+
+            variables.add(varName);
+            if(digit_variable_){
+                digit_variable_ = varName.isdigit();
+            }
+        }
+        formula_.add(clause);
+    }
+    for(auto var: variables){
+        sorted_variables_.append(var);
+    }
+    sorted_variables_.sort(varibale_order_);
+    LOG_INFO("sorted_variables_: {}", sorted_variables_.toString());
+    LOG_INFO("digit_variable_: {}", digit_variable_);
+}
+
+
 
 
 

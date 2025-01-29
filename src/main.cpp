@@ -12,35 +12,17 @@ using namespace ssat;
 using namespace boost;
 using namespace std;
 
-int draw(){
-    // 定义图类型
-    typedef adjacency_list<vecS, vecS, directedS> Graph;
-    
-    // 创建图
-    Graph g(4);
-    add_edge(0, 1, g);
-    add_edge(1, 2, g);
-    add_edge(2, 3, g);
-    
-    // 输出图为 Graphviz 格式
-    write_graphviz(cout, g);
-    
-    return 0;
-}
-
 
 
 int main(int argc, char**argv) {
-    draw();
-    argparse::ArgumentParser program("SimpleSAT");
+    argparse::ArgumentParser program("SimpleSAT","0.0.1");
     program.add_argument("cnf_file")               
            .help("cnf file path")             
            .required(); 
     
-    program.add_argument("--log")               
+    program.add_argument("--log","-l")     
            .help("log level: NONE|ERROR|WARN|INFO|DEBUG|DETAIL")                  
            .default_value("INFO")
-           .required()
            .action([](const std::string& value) {
                static const std::vector<std::string> choices = {"DETAIL", "DEBUG", "INFO", "WARN", "ERROR", "NONE"};
                 if (std::find(choices.begin(), choices.end(), value) == choices.end()) {
@@ -49,10 +31,9 @@ int main(int argc, char**argv) {
                return value;
            });
 
-    program.add_argument("-m")
+    program.add_argument("--method","-m")
             .help("method: " + sapy::PString("|").join(Solver::MethodNames))
             .default_value("DPLL")
-            .required()
             .action([](const std::string& value) {
                 if(Solver::MethodNames.count(sapy::PString(value)) == 0){
                     throw std::runtime_error("Invalid value for -m: " + value);

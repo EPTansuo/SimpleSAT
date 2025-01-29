@@ -15,7 +15,7 @@ Result Solver::_solve_SYMBOLIC_SAT(Formula formula) const{
     sapy::PDict Buckets;
     // for each variable V of Δ do
     for(size_t i=1; i<=val_cnt_; i++){
-        Buckets[Variable(std::to_string(i))] = BDDs();  //create empty bucket Bv
+        Buckets[Variable(_indice2variable(i))] = sapy::PSet();  //create empty bucket Bv
     }
 
 
@@ -27,12 +27,12 @@ Result Solver::_solve_SYMBOLIC_SAT(Formula formula) const{
         // Bv = Bv ∪ {OBDD(C)}
         sapy::PSet set;
         set.add(clause);
-        Buckets[variable] = Buckets[variable].unwrap<BDDs>().union_( set );
+        Buckets[variable] = Buckets[variable].unwrap<sapy::PSet>().union_( set );
     }
 
     // for each variable V of Δ according to order π do
     for(size_t i=1; i<=val_cnt_; i++){
-        Variable variable = std::to_string(i);
+        Variable variable = _indice2variable(i);
         Clauses bucket = Buckets[variable].unwrap<Clauses>();
         LOG_DETAIL("Variable: {}, Bucket: {}", variable, bucket.toString());
 

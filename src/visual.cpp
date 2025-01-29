@@ -12,33 +12,33 @@ typedef adjacency_list<vecS, vecS, directedS> Graph;
 namespace ssat{
 
 
-void _traverse_BDD(const BDD& bdd, sapy::PSet& edges, sapy::PSet& visited) {
-    if(visited.contain(bdd)) {
-        return;
-    }
-    if(bdd.size() == 1) {
-        return; // leaf node
-    }
-    visited.add(bdd);
-    LOG_DETAIL("Visit node: {}", bdd[0].toString());
+// void _traverse_BDD(const BDD& bdd, sapy::PSet& edges, sapy::PSet& visited) {
+//     if(visited.contain(bdd)) {
+//         return;
+//     }
+//     if(bdd.size() == 1) {
+//         return; // leaf node
+//     }
+//     visited.add(bdd);
+//     LOG_DETAIL("Visit node: {}", bdd[0].toString());
     
-    LOG_DETAIL("Add edge: {} -> {}", bdd[0].toString(), bdd[1].unwrap<sapy::PList>()[0].toString());
-    sapy::PList edge = {bdd[0], bdd[1].unwrap<sapy::PList>()[0]};
-    edges.add(edge);
+//     LOG_DETAIL("Add edge: {} -> {}", bdd[0].toString(), bdd[1].unwrap<sapy::PList>()[0].toString());
+//     sapy::PList edge = {bdd[0], bdd[1].unwrap<sapy::PList>()[0]};
+//     edges.add(edge);
 
-    LOG_DETAIL("Add edge: {} -> {}", bdd[0].toString(), bdd[2].unwrap<sapy::PList>()[0].toString());
-    sapy::PList edge2 = {bdd[0], bdd[2].unwrap<sapy::PList>()[0]};
-    edges.add(edge2);
+//     LOG_DETAIL("Add edge: {} -> {}", bdd[0].toString(), bdd[2].unwrap<sapy::PList>()[0].toString());
+//     sapy::PList edge2 = {bdd[0], bdd[2].unwrap<sapy::PList>()[0]};
+//     edges.add(edge2);
 
-    if(bdd[1].is<BDD>()){
-        _traverse_BDD(bdd[1], edges, visited);    
-    }else if (bdd[2].is<BDD>()){
-        _traverse_BDD(bdd[2], edges, visited);
-    }else{
-        return; // leaf node
-    }
+//     if(bdd[1].is<BDD>()){
+//         _traverse_BDD(bdd[1], edges, visited);    
+//     }else if (bdd[2].is<BDD>()){
+//         _traverse_BDD(bdd[2], edges, visited);
+//     }else{
+//         return; // leaf node
+//     }
     
-}
+// }
 
 
 // 生成 DOT 字符串的函数
@@ -46,16 +46,23 @@ sapy::PString Solver::_BDD_to_dot(const BDD& bdd) const{
     sapy::PString dot = "digraph G {\n";
 
 
-    sapy::PSet visited;
-    sapy::PSet edges;
-    _traverse_BDD(bdd, edges, visited);
 
+    // sapy::PSet visited;
+    sapy::PSet edges;
+    // _traverse_BDD(bdd, edges, visited);
+    for(auto bddnode_wrap: bdd){
+        LOG_DETAIL("Visit node: {}", bddnode_wrap.first.toString());
+        Variable varname = bddnode_wrap.first;
+        BDDNode bddnode = bddnode_wrap.second;
+        edges.add(sapy::PList{varname, bddnode[1]});
+        edges.add(sapy::PList{varname, bddnode[2]});
+    }
     
 
     for(auto edge_wrap: edges) {
         sapy::PList edge = edge_wrap;
-        const sapy::PString quote_l = "\"\\\"";
-        const sapy::PString quote_r = "\\\"\"";
+        const sapy::PString quote_l = digit_variable_ ? "\"\\\"" : "";
+        const sapy::PString quote_r = digit_variable_ ? "\\\"\"" : "";
         sapy::PString out = quote_l + edge[0].toString() +  quote_r;
         sapy::PString in = edge[1].is<Variable>() ? quote_l + edge[1].toString() +  quote_r:
                            edge[1].toString();

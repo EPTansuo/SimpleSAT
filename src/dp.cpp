@@ -20,7 +20,7 @@ Result Solver::_solve_DP(Formula formula){
     
     // for each variable V of Δ do
     for(size_t i=1; i<=val_cnt_; i++){
-        Buckets[Variable(std::to_string(i))] = Clauses();  //create empty bucket Bv
+        Buckets[Variable(_indice2variable(i))] = Clauses();  //create empty bucket Bv
     }
 
     // for each clause C of Δ do
@@ -36,7 +36,7 @@ Result Solver::_solve_DP(Formula formula){
     LOG_DEBUG("Buckets: {}", Buckets.toString());
     // for each variable V of Δ in order π 
     for(size_t i=1; i<=val_cnt_; i++){
-        Variable variable = std::to_string(i);
+        Variable variable = _indice2variable(i);
         Clauses bucket = Buckets[variable].unwrap<Clauses>();
         LOG_DETAIL("Variable: {}, Bucket: {}", variable, bucket.toString());
         // if BV is not empty then
