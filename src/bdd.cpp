@@ -1,23 +1,45 @@
 #include "solver.hpp"
+#include <stack>
 
 namespace ssat{
 
 // // BDD: bdd[0]: variable name, bdd[1]: low_branch, bdd[2]: high_branch
 // // Based on the concepts from "Introduction to Binary Decision Diagrams" by Henrik Reif Andersen
-BDD Solver::_OBDD(Clause clause) const{
-    BDD bdd_r =  _OBDD_r(BDD(), clause, 0);
+BDD Solver::_OBDD(Clause clause) const {
+    BDD bdd_r = _OBDD_r(BDD(), clause, 0);
     LOG_DETAIL("OBDD_r: {}", bdd_r.toString());
-    BDD bdd;
-    for(auto bdd_r_item = (*bdd_r.begin()); 
-            bdd_r_item.second.unwrap<BDDNode>()[1].is<BDD>(); 
-            bdd_r_item = bdd_r_item.second.unwrap<BDDNode>()[1]
-        ){
-        LOG_DETAIL("BDD_r_item: {}", bdd_r_item.first.toString());
-        bdd[bdd_r_item.first] = bdd_r_item.second;
+
+    BDD bdd;  
+    std::stack<BDDNode> stack;
+
+    if (bdd_r != BDD()) {
+        stack.push(*bdd_r.begin());  
     }
+
+    while (!stack.empty()) {
+        BDDNode n = stack.top();
+        stack.pop();
+
+        BDDNodeVar nvar = n.second;
+        LOG_DETAIL("BDD_r_item: {}", n.first.toString());
+
+        auto low_branch = nvar[1].is<BDD>() ? (*nvar[1].unwrap<BDD>().begin()).first : nvar[1];
+        auto high_branch = nvar[2].is<BDD>() ? (*nvar[2].unwrap<BDD>().begin()).first : nvar[2];
+        BDDNodeVar tmp = sapy::PList({nvar[0], low_branch, high_branch});
+        bdd[n.first] = tmp;  
+
+        if (nvar[2].is<BDD>()) {
+            stack.push(*nvar[2].unwrap<BDD>().begin());
+        }
+        if (nvar[1].is<BDD>()) {
+            stack.push(*nvar[1].unwrap<BDD>().begin());
+        }
+    }
+
     LOG_DETAIL("OBDD: {}", bdd.toString());
     return bdd;
 }
+
 
 BDD Solver::_OBDD_r(BDD bdd, Clause clause, int branch) const{
     if(clause.size() == 0){
@@ -31,10 +53,10 @@ BDD Solver::_OBDD_r(BDD bdd, Clause clause, int branch) const{
     auto t1_clause = Clause();
     BDD t0 = _OBDD_r(bdd, t0_clause, 0);
     BDD t1 = _OBDD_r(bdd, t1_clause, 1);
-    BDDNode node = {_variable2indice(variable), 
+    BDDNodeVar nodeVar = {_variable2indice(variable), 
                 t0!=BDD() ? (sapy::PAnyWrapper)t0 : (sapy::PAnyWrapper)0,
                 t1!=BDD() ? (sapy::PAnyWrapper)t1 : (sapy::PAnyWrapper)1};
-    bdd[variable] = node;
+    bdd[variable] = nodeVar;
     return bdd;
 }
 

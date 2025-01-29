@@ -23,10 +23,12 @@ using Variable = sapy::PString;
  * The Data Structure of BDD based on the concepts from Page 15
  * "Introduction to Binary Decision Diagrams" by Henrik Reif Andersen.
  *
- * - BDDNode: [index, low, high]
+ * - BDDNodeVar: [index, low, high]
+ * - BDDNode: std::pair<Variable, BDDNodeVar>
  * - BDD: var_name ⟼ [index, low, high] (mapping)
  ******************************************************/
-using BDDNode = sapy::PList; 
+using BDDNode = std::pair<sapy::PString, sapy::PList>;
+using BDDNodeVar = sapy::PList; 
 using BDD = sapy::PDict;
 
 
