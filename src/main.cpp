@@ -5,12 +5,6 @@
 
 using namespace ssat;
 
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graphviz.hpp>
-#include <iostream>
-
-using namespace boost;
-using namespace std;
 
 
 

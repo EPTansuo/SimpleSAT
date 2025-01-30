@@ -139,15 +139,16 @@ private:
 
     Result _solve_SYMBOLIC_SAT(Formula formula) const;
 
-    BDD _OBDD_r(BDD bdd, Clause clause, int branch = 0) const;
-    BDD _OBDD(Clause clause) const;
+    BDD _ROBDD_r(BDD bdd, BDD& table_T, BDD& table_H,  Clause clause, int branch) const;
+    BDD _ROBDD(Clause clause) const;
     // BDD _ROBDD(Clause clause) const;
 
     sapy::PString _BDD_to_dot(const BDD& bdd) const;
     void _show_dot(const sapy::PString& dot, bool block = true) const;
     void _show_BDD(const BDD& bdd, bool block = true) const;
     BDD _reduce_OBDD(const BDD& bdd)const;
-
+    BDD _apply_and_BDD(const BDD& lhs, const BDD& rhs) const; //Only support conjunction now
+    BDDNode _mk_unique_BDD(BDD& table_T, BDD& table_H, BDDNodeVar nvar) const;
 
     // indice here is 1-based
     int _variable2indice(const Variable& variable) const;
@@ -155,7 +156,7 @@ private:
 
 
     std::function<bool(const Variable&, const Variable&)> varibale_order_ = [](const Variable& v1, const Variable& v2){
-        return v1 < v2;
+        return v1 < v2;  // lexical order
     };
 };
 

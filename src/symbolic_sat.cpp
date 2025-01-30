@@ -25,8 +25,8 @@ Result Solver::_solve_SYMBOLIC_SAT(Formula formula) const{
         Variable variable = _firstVariable(clause); //V = first variable of C according to order π
 
         // Bv = Bv ∪ {OBDD(C)}
-        sapy::PSet set;
-        set.add(clause);
+        BDD bdd = _ROBDD(clause);
+        sapy::PSet set = sapy::PSet({bdd});
         Buckets[variable] = Buckets[variable].unwrap<sapy::PSet>().union_( set );
     }
 

@@ -1,13 +1,8 @@
 #include "solver.hpp"
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graphviz.hpp>
 #include <unistd.h>
 #include <thread>
 #include <fstream>
-using namespace boost;
 
-
-typedef adjacency_list<vecS, vecS, directedS> Graph;
 
 namespace ssat{
 
@@ -25,27 +20,28 @@ sapy::PString Solver::_BDD_to_dot(const BDD& bdd) const{
         Variable varname = bddnode.first;
         BDDNodeVar nvar = bddnode.second;
         if(nvar[1].is<BDD>()){
-            edges.add(sapy::PList{varname, nvar[1].unwrap<BDD>().begin()->first});
+            edges.add(sapy::PList{varname, nvar[1].unwrap<BDD>().begin()->first, 0});
         }else{
-            edges.add(sapy::PList{varname, nvar[1]});
+            edges.add(sapy::PList{varname, nvar[1], 0});
         }
         if(nvar[2].is<BDD>()){
-            edges.add(sapy::PList{varname, nvar[2].unwrap<BDD>().begin()->first});
+            edges.add(sapy::PList{varname, nvar[2].unwrap<BDD>().begin()->first, 1});
         }else{
-            edges.add(sapy::PList{varname, nvar[2]});
+            edges.add(sapy::PList{varname, nvar[2], 1});
         }
     }
     
 
     for(auto edge_wrap: edges) {
         sapy::PList edge = edge_wrap;
-        const sapy::PString quote_l = digit_variable_ ? "\"\\\"" : "";
-        const sapy::PString quote_r = digit_variable_ ? "\\\"\"" : "";
-        sapy::PString out = quote_l + edge[0].toString() +  quote_r;
-        sapy::PString in = edge[1].is<Variable>() ? quote_l + edge[1].toString() +  quote_r:
+        sapy::PString quote_l = digit_variable_ ? "\"\\\"" : "";
+        sapy::PString quote_r = digit_variable_ ? "\\\"\"" : "";
+        sapy::PString line_style = edge[2].unwrap<int>() == 0 ? "[style=dashed]": "";
+        sapy::PString source = quote_l + edge[0].toString() +  quote_r;
+        sapy::PString sink = edge[1].is<Variable>() ? quote_l + edge[1].toString() +  quote_r:
                            edge[1].toString();
 
-        dot += out + " -> " + in + ";\n";
+        dot += source + " -> " + sink + line_style + ";\n";
     }
 
     dot += "}\n";

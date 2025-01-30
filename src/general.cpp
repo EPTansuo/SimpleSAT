@@ -143,12 +143,20 @@ Result Solver::solve(Method method){
     // std::cout << "Result: " << result.toString() << std::endl;
 
     Formula form = Formula(formula_);
-    Clause clause = *form.begin();
+    Clause clause1 = *form.begin();
+    
+    Clause clause2 = *(++form.begin());
+    BDD bdd1 = _ROBDD(clause1);
+    BDD bdd2 = _ROBDD(clause2);
 
-    BDD bdd = _OBDD(clause);
+    LOG_INFO("BDD1: {}", bdd1.toString());
+    LOG_INFO("BDD2: {}", bdd2.toString());
+    _show_BDD(bdd1,false);
+    _show_BDD(bdd2,false);
+    BDD bdd3 = _apply_and_BDD(bdd1, bdd2);
+    LOG_INFO("BDD3: {}", bdd3.toString());
+    _show_BDD(bdd3,true);
 
-    LOG_INFO("BDD: {}", bdd.toString());
-    _show_BDD(bdd);
 
     switch(method){
         case DP:
