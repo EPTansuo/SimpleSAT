@@ -31,7 +31,7 @@ std::variant<Result, Clause> Solver::_solve_DPLL_r(Formula formula, size_t depth
     }
 
     Literal positive_literal = _indice2variable(depth + 1);
-    Literal negative_literal = "¬" + _indice2variable(depth + 1);
+    Literal negative_literal = _complementry(positive_literal);
 
     // else if L =dpll-(Δ|Pd+1, d + 1) != unsatisfiable then
     auto result_true = _solve_DPLL_r(_condition(formula, positive_literal), depth + 1);

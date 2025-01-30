@@ -7,7 +7,8 @@ namespace ssat{
 /********************************************************
  * 
  * Davis-Putnam-Logemann-Loveland Algorithm (Ref:
- * https://www.cnblogs.com/chesium/p/15982285.html
+ * https://www.cnblogs.com/chesium/p/15982285.html, also 
+ * see Algorithm  in Handbook of satisfiability, second edition)
  * 
 *********************************************************/
 
