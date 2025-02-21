@@ -21,7 +21,7 @@ Result Solver::_solve_DPLL_classic(Formula formula) const{
 
     LOG_DEBUG("After UP: {}", formula.toString());
 
-    if(formula.contain(Clause())){
+    if(formula.contains(Clause())){
         return Result::UNSAT;
     }
 
@@ -32,7 +32,7 @@ Result Solver::_solve_DPLL_classic(Formula formula) const{
         return Result::SAT;
     }
 
-    if(formula.contain(Clause())){
+    if(formula.contains(Clause())){
         return Result::UNSAT;
     }
 

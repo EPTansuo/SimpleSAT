@@ -30,7 +30,7 @@ PString PDict::toString() const {
     return result;
 }
 
-bool PDict::contain(const PAnyWrapper& key) const {
+bool PDict::contains(const PAnyWrapper& key) const {
     return container_.find(key) != container_.end();
 }
 

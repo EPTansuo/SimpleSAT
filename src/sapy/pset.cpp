@@ -51,7 +51,7 @@ PSet PSet::copy() const {
 PSet PSet::difference(const PSet& other) const {
     PSet result;
     for (auto it = container_.begin(); it != container_.end(); ++it) {
-        if (!other.contain(*it)) {
+        if (!other.contains(*it)) {
             result.add(*it);
         }
     }
@@ -60,7 +60,7 @@ PSet PSet::difference(const PSet& other) const {
 
 void PSet::difference_update(const PSet& other) {
     for (auto it = container_.begin(); it != container_.end(); ) {
-        if (other.contain(*it)) {
+        if (other.contains(*it)) {
             it = container_.erase(it);
         } else {
             ++it;
@@ -75,7 +75,7 @@ void PSet::discard(const PAnyWrapper& elem) {
 PSet PSet::intersection(const PSet& other) const {
     PSet result;
     for (auto it = container_.begin(); it != container_.end(); ++it) {
-        if (other.contain(*it)) {
+        if (other.contains(*it)) {
             result.add(*it);
         }
     }
@@ -84,7 +84,7 @@ PSet PSet::intersection(const PSet& other) const {
 
 void PSet::intersection_update(const PSet& other) {
     for (auto it = container_.begin(); it != container_.end(); ) {
-        if (!other.contain(*it)) {
+        if (!other.contains(*it)) {
             it = container_.erase(it);
         } else {
             ++it;
@@ -94,7 +94,7 @@ void PSet::intersection_update(const PSet& other) {
 
 bool PSet::isdisjoint(const PSet& other) const {
     for (auto it = container_.begin(); it != container_.end(); ++it) {
-        if (other.contain(*it)) {
+        if (other.contains(*it)) {
             return false;
         }
     }
@@ -104,7 +104,7 @@ bool PSet::isdisjoint(const PSet& other) const {
 
 bool PSet::issubset(const PSet& other) const {
     for (auto it = container_.begin(); it != container_.end(); ++it) {
-        if (!other.contain(*it)) {
+        if (!other.contains(*it)) {
             return false;
         }
     }
@@ -166,7 +166,7 @@ bool PSet::operator==(const PSet& other) const {
         return false;
     }
     for (auto it = container_.begin(); it != container_.end(); ++it) {
-        if (!other.contain(*it)) {
+        if (!other.contains(*it)) {
             return false;
         }
     }

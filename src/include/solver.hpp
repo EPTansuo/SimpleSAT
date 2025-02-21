@@ -213,7 +213,7 @@ inline Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
 
     if(to_remove.size()==0){
         // Stop  recursive here
-        if(formula.contain(sapy::PSet())){
+        if(formula.contains(sapy::PSet())){
             return Result::UNSAT;   
         }else if(formula.size() == 1){
             return Result::SAT;
@@ -221,7 +221,7 @@ inline Result Solver::_solve_Resolution(Formula formula, sapy::PSet literals){
             return Result::UNKNOWN;
             // for(auto literal_wrap: literals){
             //     _condition(formula, literal_wrap);
-            //     if(formula.contain(sapy::PSet())){
+            //     if(formula.contains(sapy::PSet())){
             //         return Result::UNSAT;
             //     }else{
             //         return Result::UNKNOWN;

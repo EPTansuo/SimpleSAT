@@ -16,9 +16,9 @@ Formula Solver::_condition(const Formula formula, const Literal& literal) const 
     Literal complementary = _complementry(literal);
     for(auto it = formula.cbegin(); it != formula.cend(); it++){
         Clause clause = *it;
-        if(clause.contain(literal)){
+        if(clause.contains(literal)){
             //result.add(clause - literal);
-        }else if(clause.contain(complementary)){
+        }else if(clause.contains(complementary)){
             result.add(clause - complementary);
         }else{
             result.add(clause);
@@ -36,9 +36,9 @@ Formula Solver::_condition(const Formula formula, const Literal& literal) const 
 //     sapy::PList to_remove;
 //     for (auto it = formula.begin(); it != formula.end(); it++) {
 //         Clause clause = *it;
-//         if (clause.contain(literal)) {
+//         if (clause.contains(literal)) {
 //             to_remove.append(clause);  
-//         } else if (clause.contain(complementary)) {
+//         } else if (clause.contains(complementary)) {
 //             to_remove.append(clause);
 //             to_add.append(clause - complementary);
 //         } else {
@@ -62,11 +62,11 @@ Clause Solver::_resolve(const Clause clause1, const Clause clause2, const Variab
     LOG_DETAIL("Resolve: Clause1: {}, Clause2: {} with Variable: {}", clause1.toString(),
                                                   clause2.toString(), variable);
     Literal complementary = _complementry(variable);
-    if(clause1.contain(variable) && clause2.contain(complementary)){
+    if(clause1.contains(variable) && clause2.contains(complementary)){
         resolvent = (clause1-variable).union_(clause2-complementary);
         got = true;
         
-    }else if(clause1.contain(complementary) && clause2.contain(variable)){
+    }else if(clause1.contains(complementary) && clause2.contains(variable)){
         resolvent = (clause1-complementary).union_(clause2-variable);
         got = true;
     }
@@ -84,7 +84,7 @@ Clause Solver::_resolve(const Clause clause1, const Clause clause2, Literal& lit
     for(auto it = clause1.cbegin(); it != clause1.cend(); it++){
         literal = *it;
         Literal complementary = _complementry(literal);
-        if(clause2.contain(complementary)){
+        if(clause2.contains(complementary)){
             resolvent = (clause1-literal).union_(clause2-complementary);
             LOG_DETAIL("Resolvent: {}, Literal: {}", resolvent.toString(),
                                                       literal.toString());

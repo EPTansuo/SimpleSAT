@@ -63,7 +63,7 @@ BDDNode Solver::_mk_unique_BDD(BDD& table_T, BDD& table_H, BDDNodeVar nvar) cons
         return h;
 
     // else if member(H, i, l, h) then
-    }else if(table_H.contain(nvar)){
+    }else if(table_H.contains(nvar)){
         return table_H[nvar];
     }else{
         table_T[var] = nvar; // u <- add(T, i, l, h, u)
@@ -86,7 +86,7 @@ BDD Solver::_ROBDD_r(BDD bdd, BDD& table_T, BDD& table_H,  Clause clause, int br
     Variable variable = _firstVariable(clause);
     Literal complementry = _complementry(variable);
 
-    bool is_positive = clause.contain(variable);
+    bool is_positive = clause.contains(variable);
 
     auto t0_clause = is_positive ? clause - variable : Clause();
     auto t1_clause = !is_positive  ? clause - complementry : Clause();
@@ -105,7 +105,7 @@ BDD Solver::_ROBDD_r(BDD bdd, BDD& table_T, BDD& table_H,  Clause clause, int br
 
 
 BDD _apply_BDD_r(sapy::PDict& cached, const BDD&lhs, const BDD &rhs) {
-    if(cached.contain(sapy::PList({lhs, rhs}))){
+    if(cached.contains(sapy::PList({lhs, rhs}))){
         return cached[sapy::PList({lhs, rhs})];
     }
     
@@ -231,8 +231,8 @@ BDD Solver::_apply_and_BDD(const BDD& lhs, const BDD& rhs) const{
 
     for (Variable var : vars) {
         
-        bool in_lhs = lhs.contain(var);
-        bool in_rhs = rhs.contain(var);
+        bool in_lhs = lhs.contains(var);
+        bool in_rhs = rhs.contains(var);
         
         if (in_lhs && in_rhs) {  
 

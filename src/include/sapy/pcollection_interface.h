@@ -43,7 +43,7 @@ public:
     }
 
     template<typename T>
-    bool contain(const T& elem) const {
+    bool contains(const T& elem) const {
         return static_cast<const Derived *>(this)->containImpl(elem);
     }
 

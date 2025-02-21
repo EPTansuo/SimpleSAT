@@ -17,7 +17,8 @@ add_compile_options(-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/src/=)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/sapy)
 
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} sapy argparse::argparse )
-add_executable(${PROJECT_NAME} ${SOURCES})
+
 

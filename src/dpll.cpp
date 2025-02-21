@@ -26,7 +26,7 @@ std::variant<Result, Clause> Solver::_solve_DPLL_r(Formula formula, size_t depth
         return Clause(); 
     } 
     // else if {} ∈ Δ then
-    else if (formula.contain(Clause())) {
+    else if (formula.contains(Clause())) {
         return Result::UNSAT;
     }
 

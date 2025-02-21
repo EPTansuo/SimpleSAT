@@ -13,7 +13,7 @@ namespace ssat{
 
 Result Solver::_solve_DP(Formula formula){
     LOG_DEBUG("Formula: {}", formula.toString());
-    if(formula.size() == 1 && formula.contain(Clause())){
+    if(formula.size() == 1 && formula.contains(Clause())){
         return Result::UNSAT;
     }
     sapy::PDict Buckets;
@@ -75,7 +75,7 @@ Result Solver::_solve_DP(Formula formula){
                             // Bu = Bu ∪ {C}
                             Clauses C;
                             C.add(v_resolvent_C);
-                            if(!to_union.contain(U)){
+                            if(!to_union.contains(U)){
                                 to_union[U] = Clauses();
                             }
                             to_union[U] = to_union[U].unwrap<Clauses>().union_(C);
@@ -90,7 +90,7 @@ Result Solver::_solve_DP(Formula formula){
 
                 Clauses updated_bucket;
                 for (const auto& clause : bucket) {
-                    if (!to_remove.contain(clause)) {
+                    if (!to_remove.contains(clause)) {
                         updated_bucket.add(clause);
                     }
                 }

@@ -106,7 +106,7 @@ public:
         return const_iterator(container_.find(key));
     }
 
-    bool contain(const PAnyWrapper& key) const;
+    bool contains(const PAnyWrapper& key) const;
 
 private:
     

@@ -620,7 +620,7 @@ PString PString::translate(const PDict &table) const
     for (auto c : _data)
     {
         auto ch = PString(c);
-        if(table.contain(ch)){
+        if(table.contains(ch)){
             result += table[ch].unwrap<PString>();
         }else{
             result += c;
