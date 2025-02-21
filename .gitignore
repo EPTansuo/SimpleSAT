@@ -5,11 +5,15 @@
 !/src/include/
 !*.hpp
 !*.cpp
+!*.h
 !.gitignore
 !/test/
 !/test/aim/
 !/test/aim/*.cnf
 !*.py
+!/src/sapy/
+!/src/include/sapy/
+!/src/include/sapy/
 !README.md
 !conanfile.txt
 !build.sh
