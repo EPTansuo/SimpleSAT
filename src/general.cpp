@@ -1,3 +1,4 @@
+#include "include/sapy/pset.h"
 #include "solver.hpp"
 
 namespace ssat{
@@ -149,13 +150,13 @@ Result Solver::solve(Method method){
     BDD bdd1 = _ROBDD(clause1);
     BDD bdd2 = _ROBDD(clause2);
 
-    LOG_INFO("BDD1: {}", bdd1.toString());
-    LOG_INFO("BDD2: {}", bdd2.toString());
-    _show_BDD(bdd1,false);
-    _show_BDD(bdd2,false);
-    BDD bdd3 = _apply_and_BDD(bdd1, bdd2);
-    LOG_INFO("BDD3: {}", bdd3.toString());
-    _show_BDD(bdd3,true);
+    // LOG_INFO("BDD1: {}", bdd1.toString());
+    // LOG_INFO("BDD2: {}", bdd2.toString());
+    // _show_BDD(bdd1,false);
+    // _show_BDD(bdd2,false);
+    // BDD bdd3 = _apply_and_BDD(bdd1, bdd2);
+    // LOG_INFO("BDD3: {}", bdd3.toString());
+    // _show_BDD(bdd3,true);
 
 
     switch(method){

@@ -27,7 +27,7 @@ int main(int argc, char**argv) {
 
     program.add_argument("--method","-m")
             .help("method: " + sapy::PString("|").join(Solver::MethodNames))
-            .default_value("DPLL")
+            .default_value("DPLL_CLASSIC")
             .action([](const std::string& value) {
                 if(Solver::MethodNames.count(sapy::PString(value)) == 0){
                     throw std::runtime_error("Invalid value for -m: " + value);

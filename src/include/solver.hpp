@@ -120,6 +120,8 @@ private:
     // bool UP(Formula &);
     // bool PLE(Formula &);
     // Result _solve_DPLL(Formula);
+    Variable _pickByNeuroCore(const Formula&) const;
+    void _init_neuro_order(const Formula&) const;
 
     Result _solve_Resolution(Formula,sapy::PSet literals);
     Clause _resolve(const Clause clause1, const Clause clause2, Literal& literal) const;
@@ -133,7 +135,7 @@ private:
 
     std::variant<Result, Clause> _solve_DPLL_r(Formula formula, size_t depth) const ;
     Result _solve_DPLL(Formula formula) const;
-    Result _solve_DPLL_classic(Formula formula) const;
+    Result _solve_DPLL_classic(Formula formula, int depth=0) const;
     Formula _unit_progate(Formula formula) const;
     Formula _pure_iteral_elimination(Formula formula) const;
 
@@ -155,7 +157,10 @@ private:
     Variable _indice2variable(int indice) const;
 
 
-    std::function<bool(const Variable&, const Variable&)> varibale_order_ = [](const Variable& v1, const Variable& v2){
+    std::function<bool(const Variable&, const Variable&)> varibale_order_ = [&](const Variable& v1, const Variable& v2){
+        if(digit_variable_){
+            return std::stoi((std::string)v1) < std::stoi((std::string)v2);
+        }
         return v1 < v2;  // lexical order
     };
 };

@@ -1,7 +1,7 @@
 #!/bin/env python
 
 import os
-
+import time
 
 def get_cnf_files(folder_path):
     cnf_files = []
@@ -22,6 +22,7 @@ def main():
 
     dut = "../build/SimpleSAT"
     results = []
+    durations = []
 
     cnf_files = get_cnf_files(os.getcwd() + "/aim")
 
@@ -36,7 +37,12 @@ def main():
         size -= 1
 
         print(f"Testing {cnf_file}... ", end="")
+        start_time = time.time() 
         ret = os.system(f"{dut} {cnf_file}")
+        end_time = time.time()
+        elapsed = end_time - start_time
+        durations.append(elapsed) 
+
         ret >>= 8   
 
         expect =  10 if cnf_file.split("-")[3].startswith("yes") else 20
@@ -56,18 +62,20 @@ def main():
     cnf_files_basename_align = [cnf_file.ljust(max_legth) for cnf_file in cnf_files_basename]
 
 
-    for result,cnf_file in zip(results,cnf_files_basename_align):
+    for result,cnf_file, duration in zip(results,cnf_files_basename_align, durations):
         
         print(f"{os.path.basename(cnf_file)}: ", end="")
+        result_str=""
         if result == result_pass:
-            print("[\33[1;32mPASS\33[0m]")
+            result_str = ("[\33[1;32mPASS\33[0m]")
         #elif result == 2:
         #    print("[\33[1;33mERROR\33[0m]")
         elif result == result_faild:
-            print("[\33[1;31mFAIL\33[0m]")
+            result_str = ("[\33[1;31mFAIL\33[0m]")
         else:
-            print("[\33[1;34mUNKNOWN\33[0m]")
+            result_str = ("[\33[1;34mUNKNOWN\33[0m]")
 
+        print(f"{result_str}  {duration:.3f} s")
 
 
 if __name__ == "__main__":
