@@ -17,3 +17,11 @@
 !README.md
 !conanfile.txt
 !build.sh
+!/benchmark
+!/benchmark/*.py
+!/benchmark/*.sh
+!/benchmark/cnf
+!/benchmark/cnf/UF250.1065.100/
+!/benchmark/cnf/UF250.1065.100/*.cnf
+!/benchmark/cnf/UUF250.1065.100/
+!/benchmark/cnf/UUF250.1065.100/*.cnf
