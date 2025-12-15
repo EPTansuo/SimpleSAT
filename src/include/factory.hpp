@@ -1,14 +1,14 @@
 #pragma once
 #include "methods.hpp"
 #include "solver.hpp"
-#include "egsolver.h"
 #include <memory>
-// include 各个 solver 的头文件
-
+#include "CDCL.hpp"
+#include "DPLL.hpp"
+#include "DP.hpp"
 
 namespace ssat {
 
-// 3) factory 生成
+
 #define FACTORY_CASE(method, solver) \
   case Method::method: return std::make_unique<solver>();
 
