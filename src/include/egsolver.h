@@ -1,5 +1,7 @@
 #pragma once
 #include "solver.hpp"
+#include "DPLL.hpp"
+#include <vector>
 
 namespace ssat {
 
@@ -17,6 +19,10 @@ public:
     // TODO: Implement setFormula logic
     (void)f;
   }
+
+  const std::vector<int8_t>& model() override { return model_; }
+private:
+  std::vector<int8_t> model_;
 };
 
 class CDCL_Solver final : public Solver {
@@ -33,20 +39,11 @@ public:
     // TODO: Implement setFormula logic
     (void)f;
   }
+  const std::vector<int8_t>& model() override { return model_; }
+private:
+  std::vector<int8_t> model_;
 };
 
-class DPLL_Solver final : public Solver {
-public:
-  std::string name() const override { return "DPLL_Solver"; }
-  Result solve(const Formula& f, const SolveOptions& opt) override {
-    (void)f; (void)opt;
-    return Result::UNKNOWN;
-  }
 
-  void setFormula(const Formula& f) override {
-    // TODO: Implement setFormula logic for DPLL_Solver
-    (void)f;
-  }
-};
 
 }

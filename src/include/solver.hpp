@@ -15,6 +15,7 @@ public:
     virtual std::string name() const = 0;
     virtual Result solve(const Formula&f, const SolveOptions& opt={}) = 0;
     virtual void setFormula(const Formula& f) = 0;
+    virtual const std::vector<int8_t>& model() = 0;
 };
 
 

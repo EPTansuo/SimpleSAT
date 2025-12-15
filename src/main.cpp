@@ -37,7 +37,7 @@ int main(int argc, char**argv) {
 
     auto &method_arg = program.add_argument("--method","-m")
             .help("SAT method: " + join("|", ssat::MethodNames))
-            .default_value(ssat::MethodNames[0]);
+            .default_value("DPLL");
     choices_from_tuple(method_arg, ssat::MethodChoicesTuple);
 
     try {
