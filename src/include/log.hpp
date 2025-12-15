@@ -16,17 +16,24 @@
 #include <string>
 #include <mutex>
 #include <format>
+#include <tuple>
+#include <vector>
 
 
 namespace ssat{
 
+#define LOG_LEVEL_TABLE(X) \
+  X(DETAIL) \
+  X(DEBUG)  \
+  X(INFO)   \
+  X(WARN)   \
+  X(ERROR)  \
+  X(NONE)
+
 enum class LogLevel {
-  DETAIL = 0,
-  DEBUG,
-  INFO,
-  WARN,
-  ERROR,
-  NONE
+#define ENUM_GEN(name) name,
+    LOG_LEVEL_TABLE(ENUM_GEN)
+#undef ENUM_GEN
 };
 
 
@@ -42,23 +49,22 @@ public :
       currentLevel_ = level;
   }
 
-  void setLogLevel(std::string level){
-      if(level == "DETAIL"){
-          setLogLevel(LogLevel::DETAIL);
-      }else if(level == "DEBUG"){
-          setLogLevel(LogLevel::DEBUG);
-      }else if(level == "INFO"){
-          setLogLevel(LogLevel::INFO);
-      }else if(level == "WARN"){
-          setLogLevel(LogLevel::WARN);
-      }else if(level == "ERROR"){
-          setLogLevel(LogLevel::ERROR);
-      }else if(level == "NONE"){
-          setLogLevel(LogLevel::NONE);
-      }else{
-          std::cerr<< "Invalid log level: " << level << std::endl;
-      }
-  }
+    static std::optional<LogLevel> parseLogLevel(std::string_view s) {
+    #define MATCH(name) if (s == #name) return LogLevel::name;
+        LOG_LEVEL_TABLE(MATCH)
+    #undef MATCH
+        return std::nullopt;
+    }
+
+    
+    void setLogLevel(std::string_view level) {
+        if (auto lv = parseLogLevel(level)) {
+            setLogLevel(*lv);
+        } else {
+            std::cerr << "Invalid log level: " << level << std::endl;
+        }
+    }
+
   template <typename... Args>
   void log(LogLevel level, std::string_view format_str, Args&&... args) const {
       std::lock_guard<std::mutex> lock(mutex_);
@@ -73,6 +79,16 @@ public :
       std::cout << levelToString(level) << ": " << message << std::endl;
   }
 
+#define STRING_GEN(name) std::string(#name),
+  static inline const std::vector<std::string> logLevelNames = { LOG_LEVEL_TABLE(STRING_GEN) };
+  static inline const auto logLevelChoicesTuple = std::tuple{ LOG_LEVEL_TABLE(STRING_GEN) };
+#undef STRING_GEN
+
+
+
+#define STR_LIT(name) #name,
+
+#undef STR_LIT
 
   Logger(const Logger&) = delete;
   Logger& operator=(const Logger&) = delete;

@@ -1,39 +1,44 @@
+#include <log.hpp>
 #include <iostream>
-#include <string>
-#include <solver.hpp>
 #include <argparse/argparse.hpp>
+#include <parse.hpp>
+#include <factory.hpp>
 
-using namespace ssat;
-
-
-
+template <class Argument, class Tuple>
+Argument& choices_from_tuple(Argument& arg, const Tuple& tup) {
+    std::apply([&](auto&&... xs) { arg.choices(xs...); }, tup);
+    return arg;
+}
+template <class Range>
+std::string join(std::string_view sep, const Range& range) {
+    std::string result;
+    bool first = true;
+    for (const auto& item : range) {
+        if (!first) {
+            result += sep;
+        }
+        result += item;
+        first = false;
+    }
+    return result;
+}
 
 int main(int argc, char**argv) {
-    argparse::ArgumentParser program("SimpleSAT","0.0.1");
+    argparse::ArgumentParser program("SimpleSAT","0.0.2");
     program.add_argument("cnf_file")               
            .help("cnf file path")             
            .required(); 
     
-    program.add_argument("--log","-l")     
-           .help("log level: NONE|ERROR|WARN|INFO|DEBUG|DETAIL")                  
-           .default_value("INFO")
-           .action([](const std::string& value) {
-               static const std::vector<std::string> choices = {"DETAIL", "DEBUG", "INFO", "WARN", "ERROR", "NONE"};
-                if (std::find(choices.begin(), choices.end(), value) == choices.end()) {
-                   throw std::runtime_error("Invalid value for --log: " + value);
-               }
-               return value;
-           });
+    auto &log_arg = program.add_argument("--log","-l")     
+           .help("Log level: " + join("|", ssat::Logger::logLevelNames))
+           .default_value("INFO");
+    choices_from_tuple(log_arg, ssat::Logger::logLevelChoicesTuple);
+           
 
-    program.add_argument("--method","-m")
-            .help("method: " + sapy::PString("|").join(Solver::MethodNames))
-            .default_value("DPLL_CLASSIC")
-            .action([](const std::string& value) {
-                if(Solver::MethodNames.count(sapy::PString(value)) == 0){
-                    throw std::runtime_error("Invalid value for -m: " + value);
-                }
-                return value;
-            });
+    auto &method_arg = program.add_argument("--method","-m")
+            .help("SAT method: " + join("|", ssat::MethodNames))
+            .default_value(ssat::MethodNames[0]);
+    choices_from_tuple(method_arg, ssat::MethodChoicesTuple);
 
     try {
         program.parse_args(argc, argv);
@@ -44,27 +49,30 @@ int main(int argc, char**argv) {
     }
 
     auto log_level = program.get<std::string>("--log");
-    auto cnf = program.get<std::string>("cnf_file");
-    auto method = Solver::methodFromString(program.get<std::string>("-m"));
+    auto cnf_file = program.get<std::string>("cnf_file");
+    auto method = ssat::method_from_string(program.get<std::string>("-m"));
 
-    Logger::getInstance().setLogLevel(log_level);
+    ssat::Logger::getInstance().setLogLevel(log_level);
 
-    Solver solver; 
-    solver.readCNF(cnf);
-    LOG_INFO("Read file: {}", argv[1]);
-
-    std::cout << solver << std::endl;
-    std::cout << "Val cnt: " << solver.getValCnt() << std::endl;
-    Result result = solver.solve(method );
-    // std::cout << solver << std::endl;
+    ssat::Formula formula;
+    try {
+        formula = ssat::parse_dimacs_file(cnf_file);
+    } catch (const ssat::DimacsParseError& e) {
+        std::cerr << e.what() << "\n";
+        return 1;
+    }
+    auto solver = ssat::make_solver(method);
+    
+    ssat::Result result = solver->solve(formula);
+    
     std::cout << "Result: " << result << std::endl;
     LOG_INFO("Result: {}", result.toString());
     
-    if(result == Result::SAT){
+    if(result == ssat::Result::SAT){
         return 10;
-    }else if(result == Result::UNSAT){
+    }else if(result == ssat::Result::UNSAT){
         return 20;
-    }else if(result == Result::UNKNOWN){
+    }else if(result == ssat::Result::UNKNOWN){
         return 30;
     }else{
         return 40;
