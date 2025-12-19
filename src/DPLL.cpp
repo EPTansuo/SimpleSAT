@@ -7,9 +7,6 @@ namespace ssat {
 
 namespace detail {
 
-// 0 = unassigned, +1 = true, -1 = false
-using Assign = std::vector<int8_t>;
-
 static inline int8_t litValue(Lit p, const Assign& asg) {
     // retVal: 1: literal=true，-1: literal=false，0: unssigned
     int v = var(p);
@@ -216,7 +213,7 @@ static bool dpll(const CNF& cnf, Assign& asg, std::vector<int>& trail) {
 Result DPLL_Solver::solve(const Formula& f, const SolveOptions& opt) {
     (void)opt;
     const CNF& cnf = f.getCNF();
-    detail::Assign asg(cnf.nVars(), 0);
+    Assign asg(cnf.nVars(), 0);
     std::vector<int> trail;
     trail.reserve(cnf.nVars());
 

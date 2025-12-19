@@ -33,6 +33,11 @@ inline bool read_next_token(std::istream& in, std::string& tok, bool& bol) {
             continue;
         }
 
+        if (bol && ch == '%') {
+            // end of file marker
+            return false;
+        }
+
         // token starts
         bol = false;
         break;

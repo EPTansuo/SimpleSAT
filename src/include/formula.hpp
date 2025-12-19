@@ -8,6 +8,9 @@
 namespace ssat {
 
 using Var = int;
+// 0 = unassigned, +1 = true, -1 = false
+using Assign = std::vector<int8_t>;
+
 
 struct Lit {
     int x; // x = (var<<1) | sign, sign: 0=pos, 1=neg

@@ -2,6 +2,7 @@
 
 import os
 import time
+from pathlib import Path
 
 def get_cnf_files(folder_path):
     cnf_files = []
@@ -20,16 +21,18 @@ def main():
     result_faild = 1
     result_unknow = 3
 
-    dut = "../build/SimpleSAT"
+    dut = "../build/SimpleSAT -m CDCL"
     results = []
     durations = []
 
     cnf_files = get_cnf_files(os.getcwd() + "/aim")
 
-    cnf_filter_files = [cnf_file for cnf_file in cnf_files if "50-1" in cnf_file or "50-2" in cnf_file ]#or "100" in cnf_file ]
+    #cnf_filter_files = [cnf_file for cnf_file in cnf_files if "50-1" in cnf_file or "50-2" in cnf_file ]#or "100" in cnf_file ]  
+    cnf_filter_files = cnf_files
 
     cnf_files = cnf_filter_files
-
+    
+    cnf_files = sorted(cnf_files, key=lambda x: (int (Path(x).name.split('-')[1]), x))
     for cnf_file in cnf_files:
         if(size == 0):
             results.append(3)
@@ -75,7 +78,7 @@ def main():
         else:
             result_str = ("[\33[1;34mUNKNOWN\33[0m]")
 
-        print(f"{result_str}  {duration:.3f} s")
+        print(f"{result_str}  {duration:.5f} s")
 
 
 if __name__ == "__main__":
